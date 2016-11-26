@@ -1,5 +1,5 @@
 import pytest
-from ..Sorting.sorting import insertion_sort
+from ..Sorting.sorting import insertion_sort, merge_sort
 
 
 @pytest.fixture(
@@ -17,3 +17,11 @@ def test_insertion_sort(sort_test_input):
     input = sort_test_input[0]
     sorted = sort_test_input[1]
     assert insertion_sort(input) == sorted
+
+
+def test_merge_sort(sort_test_input):
+
+    input = sort_test_input[0]
+    sorted = sort_test_input[1]
+
+    assert merge_sort(input) == sorted
