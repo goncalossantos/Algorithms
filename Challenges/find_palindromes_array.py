@@ -32,4 +32,3 @@ def find_palindromes(array):
 a = ["abc", "cba", "ddd", "gfh", "fg", "hfg"]
 
 result = find_palindromes(a)
-import pdb; pdb.set_trace()  # breakpoint 7552d1b1 //
