@@ -84,4 +84,3 @@ def test_number_to_text():
         "hundred twenty three "
     result = number_to_text(-123456789123)
     assert result == expected
-
