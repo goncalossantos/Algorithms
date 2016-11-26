@@ -12,25 +12,20 @@ def get_compressed(char, count):
 
 
 def string_compression(string):
+    compressed = []
+    counter = 0
 
-    output_string = ''
+    for i in range(len(string)):
+        if i != 0 and string[i] != string[i - 1]:
+            compressed.append(string[i - 1] + str(counter))
+            counter = 0
+        counter += 1
 
-    current_count = 0
-    current_char = ''
+    # add last repeated character
+    compressed.append(string[-1] + str(counter))
 
-    for char in string:
-        if current_char != char:
-            # Get the compressed part if count is bigger than one
-            output_string += get_compressed(current_char, current_count)
-            if len(output_string) >= len(string):
-                return string
-            # Update the char and the count
-            current_char = char
-            current_count = 1
-        else:
-            current_count += 1
-    output_string += get_compressed(current_char, current_count)
-    return output_string if len(output_string) < len(string) else string
+    # returns original string if compressed string isn't smaller
+    return min(string, ''.join(compressed), key=len)
 
 
 def test_string_compression():
