@@ -38,7 +38,7 @@ def maximum_cross_subarray(a, left, right, mid):
     return (max_left, max_right, sum_left + sum_right)
 
 
-def maximum_subarray(array, l, r):
+def recursive_maximum_subarray(array, l, r):
     """Calculates maximum subarray of array
 
     By using recursion on an array, returns the
@@ -52,12 +52,13 @@ def maximum_subarray(array, l, r):
 
     if r == l:
         # Only one element in subarray, return
-        return (l, r, array[r])
+        return (l, r, array[l])
 
     q = (r + l) / 2
 
-    left_left, left_right, left_sum = maximum_subarray(array, l, q)
-    right_left, right_right, right_sum = maximum_subarray(array, q + 1, r)
+    left_left, left_right, left_sum = recursive_maximum_subarray(array, l, q)
+    right_left, right_right, right_sum = recursive_maximum_subarray(array,
+                                                                    q + 1, r)
     cross_left, cross_right, cross_sum = maximum_cross_subarray(array, l, r, q)
 
     # Return the indexes correspoding to the maximum sum
@@ -69,3 +70,43 @@ def maximum_subarray(array, l, r):
     sums = [left_sum, right_sum, cross_sum]
     index = sums.index(max(sums))
     return (indexes[index][0], indexes[index][1], max(sums))
+
+
+def maximum_subarray(array, l, r):
+
+    max_left = l
+    best_so_far = best_now = array[l]
+    now = array[l]
+    tentative_left = l
+    for i in range(l + 1, r + 1):
+        best_now  = max(best_now + array[i], array[i])
+        if best_now == array[i]:
+            tentative_left = i
+        tentative_best_so_far = max(best_so_far, best_now)
+        if tentative_best_so_far == best_now:
+            max_left = tentative_left
+            max_right = i
+            best_so_far = tentative_best_so_far
+
+    return (max_left, max_right, best_so_far)
+
+
+def maximum_subarray_sum(A):
+    max_ending_here = max_so_far = 0
+    for x in A:
+        max_ending_here = max(0, max_ending_here + x)
+        max_so_far = max(max_so_far, max_ending_here)
+    return max_so_far
+
+def maximum_subarray_sum_2(A):
+    max_ending_here = max_so_far = A[0]
+    for x in A[1:]:
+        max_ending_here = max(x, max_ending_here + x)
+        max_so_far = max(max_so_far, max_ending_here)
+    return max_so_far
+
+print maximum_subarray([5,5,-11,9,20], 0, len([5,5,-9,10,20])-1)
+print recursive_maximum_subarray([5,5,-11,9,20], 0, len([5,5,-9,10,20])-1)
+print maximum_subarray_sum([5,5,-11,9,20])
+
+
