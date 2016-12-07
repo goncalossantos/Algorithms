@@ -1,4 +1,23 @@
 # Introduction to Algorithms, Third edition, Chapter 4.1
+import time
+from numpy.random import randint
+import sys
+import numpy as np
+import matplotlib
+# Bug in my machine doesn't let me use default
+matplotlib.use('Qt5Agg')
+import matplotlib.pyplot as plt
+
+
+def timing(f):
+    def wrap(*args):
+        time1 = time.time()
+        ret = f(*args)
+        time2 = time.time()
+        # print '%s function took %0.3f ms' % (f.func_name,
+        # (time2-time1)*1000.0)
+        return (time2 - time1) * 1000.0
+    return wrap
 
 
 def maximum_cross_subarray(a, left, right, mid):
@@ -72,14 +91,14 @@ def recursive_maximum_subarray(array, l, r):
     return (indexes[index][0], indexes[index][1], max(sums))
 
 
+@timing
 def maximum_subarray(array, l, r):
 
-    max_left = l
+    max_right = max_left = l
     best_so_far = best_now = array[l]
-    now = array[l]
     tentative_left = l
     for i in range(l + 1, r + 1):
-        best_now  = max(best_now + array[i], array[i])
+        best_now = max(best_now + array[i], array[i])
         if best_now == array[i]:
             tentative_left = i
         tentative_best_so_far = max(best_so_far, best_now)
@@ -91,22 +110,102 @@ def maximum_subarray(array, l, r):
     return (max_left, max_right, best_so_far)
 
 
+@timing
 def maximum_subarray_sum(A):
+    # Only returns count
     max_ending_here = max_so_far = 0
     for x in A:
         max_ending_here = max(0, max_ending_here + x)
         max_so_far = max(max_so_far, max_ending_here)
     return max_so_far
 
+
+@timing
 def maximum_subarray_sum_2(A):
+    # Only returns count
     max_ending_here = max_so_far = A[0]
     for x in A[1:]:
         max_ending_here = max(x, max_ending_here + x)
         max_so_far = max(max_so_far, max_ending_here)
     return max_so_far
 
-print maximum_subarray([5,5,-11,9,20], 0, len([5,5,-9,10,20])-1)
-print recursive_maximum_subarray([5,5,-11,9,20], 0, len([5,5,-9,10,20])-1)
-print maximum_subarray_sum([5,5,-11,9,20])
+
+@timing
+def brute_force_maximum_subarray(array, l, r):
+
+    max_sum = - float("inf")
+    max_right = 0
+    max_left = 0
+    for i in range(l, r + 1):
+        sum = 0
+        for j in range(i, r + 1):
+            sum += array[j]
+            if sum > max_sum:
+                max_sum = sum
+                max_right = j
+                max_left = i
+
+    return (max_left, max_right, max_sum)
 
 
+def test_maximum_subarray():
+
+    print maximum_subarray(
+        [5, 5, -11, 9, 20], 0, len([5, 5, -9, 10, 20]) - 1)
+    print recursive_maximum_subarray(
+        [5, 5, -11, 9, 20], 0, len([5, 5, -9, 10, 20]) - 1)
+    print maximum_subarray_sum(
+        [5, 5, -11, 9, 20])
+    print brute_force_maximum_subarray(
+        [5, 5, -11, 9, 20], 0, len([5, 5, -9, 10, 20]) - 1)
+
+    print maximum_subarray(
+        [-5, -5, -11, -9, -1], 0, len([5, 5, -9, 10, 20]) - 1)
+    print recursive_maximum_subarray(
+        [-5, -5, -11, -9, -1], 0, len([5, 5, -9, 10, 20]) - 1)
+    print maximum_subarray_sum(
+        [-5, -5, -11, -9, -1])
+    print brute_force_maximum_subarray(
+        [-5, -5, -11, -9, -1], 0, len([5, 5, -9, 10, 20]) - 1)
+
+
+def profile_recursive(a):
+
+    time1 = time.time()
+    recursive_maximum_subarray(a, 0, len(a) - 1)
+    time2 = time.time()
+    return (time2 - time1) * 1000.0
+
+
+def compare():
+    """Compares the three algorithms
+
+    Compares the brute force O(n2) vs the recursive O(nlg(n))
+    vs the dp O(n) solution
+    """
+
+    brute_results = []
+    dp_results = []
+    recursive_results = []
+    iterations = 1
+    LOW = -1000
+    HIGH = 1000
+
+    max_size_array = 50
+    t = np.arange(1., max_size_array, 1)
+    for i in range(iterations):
+        for j in range(1, max_size_array, 1):
+
+            a = randint(low=LOW, high=HIGH, size=j)
+            brute_results.append(
+                brute_force_maximum_subarray(a, 0, len(a) - 1))
+            recursive_results.append(profile_recursive(a))
+            dp_results.append(maximum_subarray(a, 0, len(a) - 1))
+
+    plt.plot(
+        t, np.asarray(brute_results), 'r--', t,
+        np.asarray(recursive_results), 'bs', t, np.asarray(dp_results), 'g^')
+    plt.show()
+
+
+compare()
