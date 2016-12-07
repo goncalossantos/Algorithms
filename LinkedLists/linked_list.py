@@ -136,5 +136,29 @@ class LinkedList(object):
 
             self.append(v)
 
+    def as_list(self):
+        return [n.value for n in self]
+
+    def __eq__(self, other):
+        """Override the default Equals behavior"""
+        if isinstance(other, self.__class__):
+            return self.as_list() == other.as_list()
+        return False
+
+    def __ne__(self, other):
+        """Define a non-equality test"""
+        return not self.__eq__(other)
+
+    def search(self, item):
+        current = self.head
+        found = False
+        while current is not None and not found:
+            if current.value == item:
+                found = True
+            else:
+                current = current.next
+
+        return found
+
 
 print LinkedList([1,2,3,4,5,6,7,8])
