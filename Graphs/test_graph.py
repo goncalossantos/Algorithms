@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from Graphs.algorithms import dijkstra_shortest_path
 from Graphs.base import Graph, Edge
 
 
@@ -101,3 +102,21 @@ class TestGraph(TestCase):
     def test_recursive_dfs(self):
         g = graph_for_transversal()
         assert g.recursive_dfs(0) == [0, 1, 2, 4, 3, 5]
+
+
+class TestDijkstraShortestPath(TestCase):
+    matrix = [
+        [0, 4, 0, 0, 0, 0, 0, 8, 0],
+        [4, 0, 8, 0, 0, 0, 0, 11, 0],
+        [0, 8, 0, 7, 0, 4, 0, 0, 2],
+        [0, 0, 7, 0, 9, 14, 0, 0, 0],
+        [0, 0, 0, 9, 0, 10, 0, 0, 0],
+        [0, 0, 4, 14, 10, 0, 2, 0, 0],
+        [0, 0, 0, 0, 0, 2, 0, 1, 6],
+        [8, 11, 0, 0, 0, 0, 1, 0, 7],
+        [0, 0, 2, 0, 0, 0, 6, 7, 0],
+    ]
+
+    def test_dijkstra_shortest_path(self):
+        g = Graph.build(self.matrix)
+        assert dijkstra_shortest_path(g, 0) == [0.0, 4.0, 12.0, 19.0, 21.0, 11.0, 9.0, 8.0, 15.0]
