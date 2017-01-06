@@ -3,7 +3,7 @@ from collections import defaultdict, deque, namedtuple
 from math import inf
 from typing import List, Dict, Set
 
-from Graphs.priority_queue import PriorityQueue
+from Graphs.priority_queue import MinHeap
 
 # TODO: Build a builder for the Graph class
 # TODO: Subclass the graph class to handle max nodes
@@ -189,7 +189,6 @@ class Graph:
         """
         init_value = -1
         edges_so_far = 0  # type:int
-        total_vertices = len(self)  # type: int
         parents_array = [init_value] * (len(self))  # type: List[int]
         target_number_edges = len(self) - 1  # type: int
         result = list()  # type: List[Edge]
@@ -261,16 +260,13 @@ class Graph:
         :return:
         """
 
-        # Set with all vertices in graph
-        vertices = set(self.graph.keys())  # type: Set[int]
-
         # set that keeps track of vertices in mst
         mst_set = set()  # type: Set[int]
         # Assign a key value to all vertices in the input graph.
         # Initial value is inf for all but the first one
-        keys = [-inf] * len(self)  # type: List[float]
+        keys = [inf] * len(self)  # type: List[float]
         keys[0] = 0.0
-        priority_queue = PriorityQueue.build(keys)
+        priority_queue = MinHeap.build([(i, priority) for i, priority in enumerate(keys)])
 
         result = set()  # type: Set[Edge]
 
@@ -280,14 +276,15 @@ class Graph:
 
             for edge in self.graph[min_index]:  # A graph has at most 2E Edges in adjacency list, so O(E)
                 source, destination, weight = edge
-                if priority_queue.contains_item(destination) and -weight > keys[destination]:  # O(1)
+                if priority_queue.contains_item(destination) and weight < keys[destination]:  # O(1)
                     keys[destination] = weight
-                    priority_queue.push(item=destination, priority=-weight)  # O(log(V))
+                    priority_queue.push(item=destination, priority=weight)  # O(log(V))
                     result.add(edge)
 
         return result
 
-    def get_vertice_with_min_weight(self, keys: List[float], mst_set: Set[int]) -> int:
+    @staticmethod
+    def get_vertice_with_min_weight(keys: List[float], mst_set: Set[int]) -> int:
         """ Returns a vertix that isn't yet in mst_set and that has minimum weight in the keys list
 
         :param keys:
@@ -316,85 +313,3 @@ class Graph:
         return "".join(to_print)
 
 
-def test() -> None:
-    g = Graph()
-    g.add_edge(0, 1)
-    g.add_edge(0, 2)
-    g.add_edge(4, 4)
-    g.add_edge(2, 4)
-    g.add_edge(1, 2)
-    g.add_edge(2, 0)
-    g.add_edge(2, 3)
-    g.add_edge(3, 3)
-    g.add_edge(5, 5)
-    g.add_edge(1, 5)
-    print("BFS:")
-    print(g.bfs(0))
-    print("Recursive DFS:")
-    print(g.recursive_dfs(0))
-
-
-def test_cycle() -> None:
-    """ Tests if the union-find algorithm for finding cycles is working
-
-    :return:
-    """
-    g = Graph(3)
-    g.add_edge(0, 1)
-    g.add_edge(0, 2)
-    # g.add_edge(0, 0)
-    assert g.contains_cycle() is False
-    g.add_edge(1, 2)
-    assert g.contains_cycle() is True
-
-
-def test_kruskal_mst():
-    g = Graph(4)
-    g.add_edge(0, 1, 10)
-    g.add_edge(0, 2, 6)
-    g.add_edge(0, 3, 5)
-    g.add_edge(1, 3, 15)
-    g.add_edge(2, 3, 4)
-    expected = [
-        Edge(source=2, destination=3, weight=4),
-        Edge(source=0, destination=3, weight=5),
-        Edge(source=0, destination=1, weight=10)
-    ]
-    assert g.kruskal_mst() == expected
-
-
-def test_prim_mst():
-    expected = set()
-    expected.update([
-        Edge(source=0, destination=1, weight=2),
-        Edge(source=1, destination=2, weight=3),
-        Edge(source=0, destination=3, weight=6),
-        Edge(source=1, destination=4, weight=5),
-    ])
-
-    g = Graph(5)
-    g.add_edge(0, 1, 2)
-    g.add_edge(0, 3, 6)
-    g.add_edge(1, 2, 3)
-    g.add_edge(1, 3, 8)
-    g.add_edge(2, 4, 7)
-    g.add_edge(3, 4, 9)
-    g.add_edge(1, 4, 5)
-    # This symmetry is needed for adjacency matrix version
-    g.add_edge(1, 0, 2)
-    g.add_edge(3, 0, 6)
-    g.add_edge(2, 1, 3)
-    g.add_edge(3, 1, 8)
-    g.add_edge(4, 2, 7)
-    g.add_edge(4, 3, 9)
-    g.add_edge(4, 1, 5)
-
-    assert g.prim_mst() == expected
-    assert g.prim_mst_with_heap() == expected
-
-
-
-test()
-test_cycle()
-test_kruskal_mst()
-test_prim_mst()
