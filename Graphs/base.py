@@ -1,10 +1,17 @@
+import operator
 from collections import defaultdict, deque, namedtuple
-from typing import List, Dict, Optional
+from math import inf
+from typing import List, Dict, Set
+
+from Graphs.priority_queue import PriorityQueue
 
 # TODO: Build a builder for the Graph class
 # TODO: Subclass the graph class to handle max nodes
 # TODO: Handle construction of graph better better
 # TODO: Subclass different types of graphs
+# TODO: Krustal's MST beginning is a mess
+# TODO: Read Union-Find by rank and understand difference
+# TODO: These MST algos really belong in their own file, not inside the graph class
 
 Edge = namedtuple("Edge", ["source", "destination", "weight"])
 
@@ -15,7 +22,7 @@ class Graph:
 
     """
 
-    def __init__(self, vertices: Optional[int] = None) -> None:
+    def __init__(self, vertices: int = None) -> None:
         """ Constructor
 
         :param vertices: Size of graph - This is optional
@@ -41,7 +48,7 @@ class Graph:
         :param v: destination node
         """
         # If the graph was constructed with a max number of edges we must check for this
-        if self.v is not None and self.v < len(self.graph) + 1:
+        if self.v is not None and self.v < len(self.graph):
             raise Exception("Graph's max size reached")
 
         # Checks if edge already exists - This makes adding slow
@@ -154,7 +161,6 @@ class Graph:
         init_value = -1  # type: int
         parents_array = [init_value] * (len(self))  # type: List[int]
 
-
         for i in self.graph:
             for edge in self.graph[i]:
                 assert isinstance(edge, Edge)
@@ -203,9 +209,93 @@ class Graph:
         return result
 
     def sort_edges_by_weight(self) -> List[Edge]:
+        """
+        
+        :return: List  of edges sorted by weight
+        """
         edges_list = [edge for node in self.graph for edge in self.graph[node]]
-        sorted_edges = sorted(edges_list, key=lambda x: x.weight)
-        return sorted_edges
+        edges_list.sort(key=lambda x: x.weight)
+        return edges_list
+
+    def prim_mst(self):
+        """ Computes the MST by Prim's algorithm
+
+        This method uses the adjacency lists but works as if the graph was represented through adjacency matrix
+        Time Complexity: O(N^2)
+
+
+        :return:
+        """
+
+        # Set with all vertices in graph
+        vertices = set(self.graph.keys())  # type: Set[int]
+
+        # set that keeps track of vertices in mst
+        mst_set = set()  # type: Set[int]
+        # Assign a key value to all vertices in the input graph.
+        # Initial value is inf for all but the first one
+        keys = [inf] * len(self)  # type: List[float]
+        keys[0] = 0.0
+
+        result = set()  # type: Set[Edge]
+
+        while mst_set != vertices:
+            min_index = self.get_vertice_with_min_weight(keys, mst_set)  # O(2N) = O(N)
+            mst_set.add(min_index)
+
+            for edge in self.graph[min_index]:  # A node has at most V-1 Edges, so O(V)
+                source, destination, weight = edge
+                if weight < keys[destination]:
+                    keys[destination] = float(weight)  # float to make it  consistent
+                    result.add(edge)
+
+        return result
+
+    def prim_mst_with_heap(self):
+        """ Computes the MST by Prim's algorithm
+
+        This method uses the adjacency lists but works as if the graph was represented through adjacency matrix
+        Time Complexity: O((V + E)log(V))
+
+
+        :return:
+        """
+
+        # Set with all vertices in graph
+        vertices = set(self.graph.keys())  # type: Set[int]
+
+        # set that keeps track of vertices in mst
+        mst_set = set()  # type: Set[int]
+        # Assign a key value to all vertices in the input graph.
+        # Initial value is inf for all but the first one
+        keys = [-inf] * len(self)  # type: List[float]
+        keys[0] = 0.0
+        priority_queue = PriorityQueue.build(keys)
+
+        result = set()  # type: Set[Edge]
+
+        while priority_queue:  # Priority queue has O(V) elements
+            min_index = priority_queue.pop()  # O(log(V))
+            mst_set.add(min_index)
+
+            for edge in self.graph[min_index]:  # A graph has at most 2E Edges in adjacency list, so O(E)
+                source, destination, weight = edge
+                if priority_queue.contains_item(destination) and -weight > keys[destination]:  # O(1)
+                    keys[destination] = weight
+                    priority_queue.push(item=destination, priority=-weight)  # O(log(V))
+                    result.add(edge)
+
+        return result
+
+    def get_vertice_with_min_weight(self, keys: List[float], mst_set: Set[int]) -> int:
+        """ Returns a vertix that isn't yet in mst_set and that has minimum weight in the keys list
+
+        :param keys:
+        :param mst_set:
+        :return:
+        """
+        min_index, _ = min([i for i in enumerate(keys) if i[0] not in mst_set], key=operator.itemgetter(1))
+        return min_index
 
     def __str__(self) -> str:
         """ Prints the graph by printing nodes and and their respective adjacent nodes
@@ -273,6 +363,38 @@ def test_kruskal_mst():
     assert g.kruskal_mst() == expected
 
 
+def test_prim_mst():
+    expected = set()
+    expected.update([
+        Edge(source=0, destination=1, weight=2),
+        Edge(source=1, destination=2, weight=3),
+        Edge(source=0, destination=3, weight=6),
+        Edge(source=1, destination=4, weight=5),
+    ])
+
+    g = Graph(5)
+    g.add_edge(0, 1, 2)
+    g.add_edge(0, 3, 6)
+    g.add_edge(1, 2, 3)
+    g.add_edge(1, 3, 8)
+    g.add_edge(2, 4, 7)
+    g.add_edge(3, 4, 9)
+    g.add_edge(1, 4, 5)
+    # This symmetry is needed for adjacency matrix version
+    g.add_edge(1, 0, 2)
+    g.add_edge(3, 0, 6)
+    g.add_edge(2, 1, 3)
+    g.add_edge(3, 1, 8)
+    g.add_edge(4, 2, 7)
+    g.add_edge(4, 3, 9)
+    g.add_edge(4, 1, 5)
+
+    assert g.prim_mst() == expected
+    assert g.prim_mst_with_heap() == expected
+
+
+
 test()
 test_cycle()
 test_kruskal_mst()
+test_prim_mst()
