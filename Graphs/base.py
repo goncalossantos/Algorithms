@@ -312,4 +312,12 @@ class Graph:
                 to_print.append(",")
         return "".join(to_print)
 
+    @classmethod
+    def build(cls, adjacency_matrix):
 
+        g = cls(len(adjacency_matrix))
+        for row_index, column in enumerate(adjacency_matrix):
+            for column_index, weight in enumerate(column):
+                if weight != 0:
+                    g.add_edge(row_index, column_index, weight)
+        return g
