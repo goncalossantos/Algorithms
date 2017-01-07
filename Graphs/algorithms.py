@@ -10,11 +10,10 @@ def dijkstra_shortest_path(graph_object: Graph, start_node: int) -> List[float]:
 
     :param graph_object:
     :param start_node:
-    :return: Returns a list. A node is represented by the index, and each List[index] is the distance from the original
-    position to that node
+    :return: Returns a list that maps indexes to distance
     """
 
-    def init_distance(g, s):
+    def init_distance(g: Graph, s: int) -> List[float]:
         d = [inf] * len(g)  # type: List[float]
         d[s] = 0.0
         return d
@@ -33,3 +32,14 @@ def dijkstra_shortest_path(graph_object: Graph, start_node: int) -> List[float]:
                 priority_queue.push(item=destination, priority=edge_weight)  # O(log(V))
 
     return distance
+
+
+def floyd_warshall(adjacency_matrix):
+    number_of_nodes = len(adjacency_matrix)
+    for k in range(number_of_nodes):
+        for i in range(number_of_nodes):
+            for j in range(number_of_nodes):
+                if adjacency_matrix[i][k] != inf and adjacency_matrix[k][j] != inf and adjacency_matrix[i][k] + \
+                        adjacency_matrix[k][j] < adjacency_matrix[i][j]:
+                    adjacency_matrix[i][j] = adjacency_matrix[i][k] + adjacency_matrix[k][j]
+    return adjacency_matrix

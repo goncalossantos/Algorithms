@@ -1,6 +1,7 @@
+from math import inf
 from unittest import TestCase
 
-from Graphs.algorithms import dijkstra_shortest_path
+from Graphs.algorithms import dijkstra_shortest_path, floyd_warshall
 from Graphs.base import Graph, Edge
 
 
@@ -120,3 +121,23 @@ class TestDijkstraShortestPath(TestCase):
     def test_dijkstra_shortest_path(self):
         g = Graph.build(self.matrix)
         assert dijkstra_shortest_path(g, 0) == [0.0, 4.0, 12.0, 19.0, 21.0, 11.0, 9.0, 8.0, 15.0]
+
+
+class TestFloydWarshall(TestCase):
+    input_matrix = [
+        [0.0, 5.0, inf, 10.0],
+        [inf, 0.0, 3.0, inf],
+        [inf, inf, 0.0, 1.0],
+        [inf, inf, inf, 0.0],
+    ]
+
+    expected = [
+        [0.0, 5.0, 8.0, 9.0],
+        [inf, 0.0, 3.0, 4.0],
+        [inf, inf, 0.0, 1.0],
+        [inf, inf, inf, 0.0],
+    ]
+
+    def test_floyd_warshall(self):
+        g = Graph.build(self.input_matrix)
+        assert floyd_warshall(g.adjacency_matrix) == self.expected
