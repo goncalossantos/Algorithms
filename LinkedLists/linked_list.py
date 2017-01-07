@@ -5,20 +5,20 @@ class InvalidOperation(Exception):
 class Node(object):
     """Node of a linked list
 
-    Represents a noded of a linked list
+    Represents a node    of a linked list
     """
 
-    def __init__(self, value, next=None):
-        self.value = value
-        self.next = next
+    def __init__(self, value, next_ele=None):
+        self._value = value
+        self._next_ele = next_ele
 
     @property
-    def next(self):
-        return self._next
+    def next_ele(self):
+        return self._next_ele
 
-    @next.setter
-    def next(self, next):
-        self._next = next
+    @next_ele.setter
+    def next_ele(self, next_ele):
+        self._next_ele = next_ele
 
     @property
     def value(self):
@@ -32,7 +32,7 @@ class Node(object):
         return str(self.value)
 
     def __repr__(self):
-        return (str(self.value), self.next is not None)
+        return str(self.value), self._next_ele is not None
 
 
 class LinkedList(object):
@@ -96,7 +96,7 @@ class LinkedList(object):
             pointer = pointer.next
             counter += 1
 
-        new_node = Node(value, next=pointer.next)
+        new_node = Node(value, next_ele=pointer.next)
         pointer.next = new_node
 
     def delete(self, pos):
@@ -133,8 +133,14 @@ class LinkedList(object):
 
     def add_multiple(self, values):
         for v in values:
-
             self.append(v)
+
+    @classmethod
+    def build(cls, values):
+        l = cls()
+        for v in values:
+            l.append(v)
+        return l
 
     def as_list(self):
         return [n.value for n in self]
@@ -142,6 +148,7 @@ class LinkedList(object):
     def __eq__(self, other):
         """Override the default Equals behavior"""
         if isinstance(other, self.__class__):
+            # This is absolutely awful.. at least make it an iterator
             return self.as_list() == other.as_list()
         return False
 
@@ -159,6 +166,3 @@ class LinkedList(object):
                 current = current.next
 
         return found
-
-
-print LinkedList([1,2,3,4,5,6,7,8])
