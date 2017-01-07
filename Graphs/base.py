@@ -20,6 +20,11 @@ class Graph:
     """ This class represents a directed graph using adjacency
     list representation
 
+    Interface:
+        Graph(number_of_nodes) -> constructor
+        build() -> build from list of lists
+        add_edge(u,v,weight) -> add an edge between nodes u an v with weight
+
     """
 
     def __init__(self, vertices: int = None) -> None:
@@ -32,6 +37,7 @@ class Graph:
         self.v = vertices
         # Default dictionary to store graph
         self.graph = defaultdict(list)  # type: Dict[int, List]
+        self._matrix = None
 
     def __len__(self):
 
@@ -282,6 +288,20 @@ class Graph:
                     result.add(edge)
 
         return result
+
+    @property
+    def adjacency_matrix(self):
+        if not self._matrix:
+            self._matrix = [[inf for item in range(len(self))] for item in range(len(self))]
+            for i in range(len(self)):
+                self._matrix[i][i] = 0.0
+            for i in range(len(self)):
+                for edge in self.graph[i]:
+                    source, destination, weight = edge
+                    self._matrix[source][destination] = weight
+        return self._matrix
+
+
 
     @staticmethod
     def get_vertice_with_min_weight(keys: List[float], mst_set: Set[int]) -> int:
