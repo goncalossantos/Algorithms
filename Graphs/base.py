@@ -318,19 +318,7 @@ class Graph:
         """ Prints the graph by printing nodes and and their respective adjacent nodes
 
         """
-        to_print = list()  # type: List[str]
-        to_print.append("Nodes in graph:")
-        for node in self.graph:
-            to_print.append("\n\t")
-            to_print.append(str(node))
-            to_print.append("->")
-            for edge in self.graph[node]:
-                assert isinstance(edge, Edge)
-                assert isinstance(edge.destination, int)
-                adjacent_node = edge.destination
-                to_print.append(str(adjacent_node))
-                to_print.append(",")
-        return "".join(to_print)
+        return str(self.adjacency_matrix)
 
     @classmethod
     def build(cls, adjacency_matrix):
