@@ -72,32 +72,35 @@ class Interval(object):
 
 
 def merge_overlapping_intervals(input_list: Sequence[Sequence[int]]) -> List[Interval]:
-    # if no valid intervals exist return empty list
+
     if not input_list:
         return []
 
-    # Build the list of interval objects
     intervals = Interval.build_intervals(input_list)
-    # Sort the intervals based on the starting position: O(nlogn)
     intervals.sort()
 
     to_merge = None
     output = []
-    # Iterate
     for interval in intervals:
         if not to_merge:
             # First object in the list
             to_merge = interval
             continue
-
         if to_merge.overlap(interval):
-            # intervals overlap, merge in place
             to_merge.merge(interval)
         else:
-            # intervals do not overlap, append to_merge to the result and point to_merge to the new interval
             output.append(to_merge)
             to_merge = interval
-    # We need to append what is left on to_merge
     output.append(to_merge)
 
     return [interval.serialize() for interval in output]
+
+
+def merge_quick_and_dirty(intervals):
+    out = []
+    for i in sorted(intervals, key=lambda i: i.start):
+        if out and i.start <= out[-1].end:
+            out[-1].end = max(out[-1].end, i.end)
+        else:
+            out += i,  # This is black magic
+    return out
