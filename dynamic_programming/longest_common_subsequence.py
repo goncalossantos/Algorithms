@@ -4,8 +4,8 @@ from typing import List
 def lcs(x: str, y: str) -> int:
     """ Computes the longest common subsequence between two strings
 
-    This function uses dynamic programmin in the form of tabulation.
-    The most import thing is that, given a strin X with length M and a string Y with length N,
+    This function uses dynamic programming in the form of tabulation.
+    The most import thing is that, given a string X with length M and a string Y with length N,
     the following is known about the LCS:
         LCS(X[:M],Y[:N) = (LCS(X[:M-1], Y[:N-1]) + 1) if X[M]=Y[N] else max(LCS(X[:M], Y[:N-1]), LCS(X[:M-1], Y[:N]))
 
